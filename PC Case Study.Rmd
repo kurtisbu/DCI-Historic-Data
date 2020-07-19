@@ -1,0 +1,477 @@
+---
+title: "Questions From 2020: Pacific Crest"
+author: "DCI Stats"
+date: "4/18/2020"
+output:
+  html_document:
+    theme: readable
+  pdf_document: default
+---
+
+<center>
+
+![](/Users/Kurtis Bulock.000\Desktop\DCI Stats\Pacific Crest.png)
+</center>
+
+```{r Add Libraries, include=FALSE}
+
+library(tidyverse)
+library(lubridate)
+library(reshape2)
+library(plyr)
+library(dplyr)
+library(GGally)
+library(knitr)
+library(kableExtra)
+library(tibble)
+library(ggrepel)
+library(tinytex)
+```
+
+```{r Load Data, include=FALSE}
+DCI_Historic_Data <- read.csv("C:/Users/Kurtis Bulock.000/Desktop/Learning R/DCI Scrape/DCI Historic Data/Full DCI Score File.csv")
+DCI_Historic_Data$Date <- as.Date(DCI_Historic_Data$Date, format = "%m/%d/%Y")
+```
+
+```{r Format Data, include=FALSE, cashe = TRUE}
+DCI_Historic_Data <- DCI_Historic_Data[order(DCI_Historic_Data$Date),]
+
+DCI_Historic_Data <- DCI_Historic_Data %>% 
+  filter( TOTAL != 0)
+  
+DCI_Historic_Data <-DCI_Historic_Data %>% 
+  mutate(year = lubridate:: year(Date),
+         month = lubridate:: month(Date),
+         day = lubridate:: day(Date))
+
+DCI_Historic_Data <-DCI_Historic_Data %>% 
+  group_by(Corps, year) %>% 
+  select(Corps, Date) %>% 
+  summarise_each(funs( Start = min)) %>% 
+  left_join(DCI_Historic_Data, ., by = c("Corps", "year")) %>% 
+  mutate(Season_Day = Date - Start) 
+  
+PC_Data <- DCI_Historic_Data %>% 
+  select(Show ,Corps, TOTAL, Season_Day, year, Date) %>% 
+  filter( Corps == "Pacific Crest") 
+
+
+
+```
+
+### The Rise and Grind
+Over the last 5 years Pacific Crest has been on the rise. In 2015 they ended their season in 21st place, just above soon-to-be World Class Genesis, and comfortably behind Open Class powerhouse Blue Devils B, with a score of 74.925. This most recent season they had a record breaking tour, ending the year with the highest score in corps history with `r max(PC_Data$TOTAL)`. They missed breaking into finals by `r 87.775 - 85.350` points, caught in 14th place. In 2020 They were ready to put all the pieces together and punch their ticket to the Saturday night show. If the 2020 season was not cancelled, Pacific Crest would be your newest Finals member in DCI.
+
+``` {r Scores, echo = FALSE, warning= FALSE}
+Semifinals_table_2015 <- DCI_Historic_Data %>% 
+  filter( year == 2015, Show == "DCI World Championship Semifinals") %>% 
+  select(Place, Corps, TOTAL)
+
+Semifinals_table_2019 <- DCI_Historic_Data %>% 
+  filter( year == 2019, Show == "DCI World Championship Semifinals") %>% 
+  select(Place, Corps, TOTAL)
+
+Semifinals_table_2015 %>% 
+  kable(align = 'clc', caption = "DCI Semifinals 2015") %>% 
+  kable_styling(full_width = F, position = "float_left") %>% 
+  row_spec(21, bold = T, color = "black", background = "#dceb0c")
+
+Semifinals_table_2019 %>% 
+  kable(align = 'clc', caption = "DCI Semifinals 2019") %>% 
+  kable_styling(full_width = F, position = "right") %>% 
+  row_spec(14, bold = T, color = "black", background = "#dceb0c")
+```
+
+<center>
+
+``` {r echo = F, message = FALSE}
+
+  DCI_Historic_Data %>% 
+    select(Show ,Corps, TOTAL, Season_Day, year) %>% 
+    filter( TOTAL > 0, Corps == "Pacific Crest") %>% 
+    ggplot(aes(x = Season_Day, y = TOTAL)) +
+    geom_point(aes(color = as.factor(year))) +
+    geom_line( aes(color = as.factor(year))) +
+    ggtitle("Pacific Crest's Score Over 5 Years") +
+    labs( x = "Days Since First Show", y = "Total Score") + 
+    theme_bw() +
+    theme(legend.title = element_blank(),legend.position = c(.94,.2)) +
+    geom_text_repel(aes(x = Season_Day, y = TOTAL, label = City, color = factor(year)),
+                    box.padding = unit(.15, "lines"),
+                    size = 2.5,
+                    point.padding = unit(.25, "lines"),
+                    segment.colour = 'black',
+                    data = subset(DCI_Historic_Data, Corps == "Pacific Crest" & Show %in% c("DCI Southwestern Championship", 
+                                                                                            "DCI Southeastern Championship", 
+                                                                                            "DCI Eastern Classic", 
+                                                                                            "DCI World Championship Semifinals")))
+```
+</center>
+
+## Season Breakdown
+
+### 2015
+
+|Year       |First Show |San Antonio Regional |Atlanta Regional |Allentown Regional |Semi-Finals |           
+|:-------:  |:-------:  |:-------:            |:-------:        |:-------:          | :-------:  |
+|2015       |58.200     |67.450               |73.600           |74.100             |74.925      |
+
+
+
+The 2015 season would start with a solid starting score and end as the lowest Semifinals score PC would receive over the last half of the decade, by a good margin.
+
+
+### 2016
+
+|Year       |First Show |San Antonio Regional |Atlanta Regional |Allentown Regional |Semi-Finals |           
+|:-------:  |:-------:  |:-------:            |:-------:        |:-------:          | :-------:  |
+|2015       |58.200     |67.450               |73.600           |74.100             |74.925      |
+|2016       |53.700     |66.875               |71.800           |75.925             |78.875      |
+
+
+
+2016 got off to a slower start. However, by the first regional of the season they were right in step to follow the same path as 2015. Except, Pacific Crest didn’t want to settle for more of the same. Over the last week of the season their score increased by almost 3 points. Pacific Crest left Lucas Oil in 2016 over 4 points higher than the previous season. Significant progress.
+
+###  2017
+
+|Year       |First Show |San Antonio Regional |Atlanta Regional |Allentown Regional |Semi-Finals |           
+|:-------:  |:-------:  |:-------:            |:-------:        |:-------:          | :-------:  |
+|2015       |58.200     |67.450               |73.600           |74.100             |74.925      |
+|2016       |53.700     |66.875               |71.800           |75.925             |78.875      |
+|2017       |60.500     |70.675               |74.550           |76.150             |78.000      |
+
+   
+
+
+Fresh off the momentum from 2016, Pacific Crest was off to a hot start in 2017. Their first score of the year increased nearly 7 points over 2016. Unfortunately, they couldn’t keep the ball rolling through the end of their season. They finished 2017 0.875 points below 2016's score. This is the only instance their final score dropped from the prior year in these 5 seasons. 
+
+
+### 2018
+
+|Year       |First Show |San Antonio Regional |Atlanta Regional |Allentown Regional |Semi-Finals |           
+|:-------:  |:-------:  |:-------:            |:-------:        |:-------:          | :-------:  |
+|2015       |58.200     |67.450               |73.600           |74.100             |74.925      |
+|2016       |53.700     |66.875               |71.800           |75.925             |78.875      |
+|2017       |60.500     |70.675               |74.550           |76.150             |78.000      |
+|2018       |62.350     |72.175               |76.325           |72.1625            |79.300      |
+
+
+
+In 2018 Pacific Crest continued to adapt. Their first show of the season was a week after the rest of the California touring corps. This new schedule may have helped. With this late start, they had their highest initial score in corps history. They followed up with a constant and steady growth through the majority of the season. There were only 2 instances where their score dropped throughout the entire tour. Compare that to the 8 times they dropped in score in 2015. Pacific Crest was becoming more consistent and scoring much higher. They ended the season on a healthy 1.3-point improvement over 2017. 
+
+### 2019
+
+|Year       |First Show |San Antonio Regional |Atlanta Regional |Allentown Regional |Semi-Finals |           
+|:-------:  |:-------:  |:-------:            |:-------:        |:-------:          |:-------:   |
+|2015       |58.200     |67.450               |73.600           |74.100             |74.925      |
+|2016       |53.700     |66.875               |71.800           |75.925             |78.875      |
+|2017       |60.500     |70.675               |74.550           |76.150             |78.000      |
+|2018       |62.350     |72.175               |76.325           |72.1625            |79.300      |
+|2019       |62.150     |75.200               |79.250           |82.575             |85.350      |
+
+
+
+
+2019 came around and Pacific Crest was on a mission. They started the season as an underdog to compete for the 12th place spot but by the end of the Allentown regional, they were ready to punch their way up the ladder. On the first night in Indianapolis, 3 corps were separated by one tenth of a point. Pacific Crest, sitting in 16th place just 3 days prior, found themselves in 14th place, with just one show remaining.
+
+
+```{r echo = F, include = F, warning= FALSE}
+
+DCI_Historic_Data %>% 
+  filter(Corps %in% c("Crossmen","Phantom Regiment", "Spirit of Atlanta", "Pacific Crest","The Academy","Colts"), year == 2019) %>% 
+  select(Date, Corps, TOTAL, Show) %>% 
+  ggplot(aes(x = Date, y = TOTAL)) +
+  geom_point(aes(color = as.factor(Corps))) +
+  geom_line( aes(color = as.factor(Corps))) +
+  ggtitle("Pacific Crest's Score over 5 years") +
+  labs( x = "Days since first show", y = "Total Score") +
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  geom_text_repel(aes(x = Date, y = TOTAL, label = City, color = factor(Corps)),
+                  box.padding = unit(.1, "lines"),
+                  size = 1.5,
+                  point.padding = unit(.2, "lines"),
+                  segment.colour = 'black',
+                  data = subset(DCI_Historic_Data, Corps %in% c("Crossmen","Phantom Regiment", "Sprit of Atlanta", "Pacific Crest","The Academy","Colts") & Show %in% c("DCI Southwestern Championship",
+                                                                                      "DCI Southeastern Championship",
+                                                                                      "DCI Eastern Classic",
+                                                                                      "DCI World Championship Semifinals") & year == 2019))
+```
+
+With a target on their back, 13th place Spirit of Atlanta looked to be just out of reach. Spirit had a comfortable `r 85.250 - 83.925` point lead heading into Semifinals. But that didn’t stop Pacific Crest from trying. After one more massive step forward, Pacific Crest ended `r 85.588	 - 85.350` points behind Spirit of Atlanta and less than 2 points away from 12th Place Phantom Regiment. Phantom went on to set the record for the highest 12th place Finals score in DCI history. Pacific Crest finished with the highest score and placement in corps history with 85.350 in 14th Place.
+
+
+
+
+
+
+``` {r echo = F}
+DCI_Historic_Data <- DCI_Historic_Data %>% 
+  filter(Corps %in% c("The Academy", "Blue Devils", "Blue Knights", "Blue Stars", "Bluecoats",
+                                         "The Cadets", "Carolina Crown", "The Cavaliers", "Colts", "Boston Crusaders", 
+                                         "Crossmen", "Genesis", "Jersey Surf", "Madison Scouts", "Mandarins", "Oregon Crusaders", 
+                                         "Pacific Crest", "Phantom Regiment", "Pioneer", "Santa Clara Vanguard", "Seattle Cascades", 
+                                         "Spirit of Atlanta", "Troopers"))
+```
+
+
+
+### Pacific Crest Vs. Others
+
+
+On average, the scores for the first performance of the season have been rising between the years 2016 and 2019. While Pacific Crest is scoring below average in their first show, they are improving as a much higher rate than the rest of the competitive field. The average opening DCI Score is up 4 points vs. 4 years ago. Pacific Crest is scoring a whopping 8 points higher in the same time period. They are improving at twice the average rate. However, it is important to note that they are are starting a week later than most corps in the last two seasons. 
+
+```{r CA_Corps_Start_Date, echo = F, include = FALSE}
+kable(DCI_Historic_Data %>% 
+  filter(year == 2018, State == "CA", Season_Day == 0) %>% 
+  select(Corps, Date, TOTAL, Season_Day), align = 'lccr') %>% 
+  kable_styling(full_width = F) %>% 
+  row_spec(7, bold = T, color = "black", background = "#dceb0c")
+
+kable(DCI_Historic_Data %>% 
+  filter(year == 2019, State == "CA", Season_Day == 0) %>% 
+  select(Corps, Date, TOTAL, Season_Day), align = 'lccr') %>% 
+  kable_styling(full_width = F) %>% 
+  row_spec(7, bold = T, color = "black", background = "#bf9134")
+```
+
+
+
+``` {r Corps Start Date, echo = F, include = F}
+DCI_Historic_Data %>% 
+  filter(Season_Day == 0) %>% 
+  select(Season_Day, Date, year) %>% 
+  group_by(year) %>% 
+  ggplot(aes(x = Date)) +
+  geom_bar() +
+  facet_wrap(~year, scales = "free") +
+  theme_bw()
+```
+
+``` {r First Show Average, echo = F, include = T}
+Avg_DCI_Starting_Score <-DCI_Historic_Data %>% 
+  filter( Season_Day == 0, year >= 2016) %>% 
+  filter(Corps != "Pioneer", Corps != "Oregon Crusaders") %>% 
+  select(year, TOTAL) %>% 
+  dplyr::group_by(year) %>%
+  dplyr::summarise(mean = round(mean(TOTAL),3)) %>% 
+  dplyr::mutate(Corps = "Average DCI Opening Score")
+
+Avg_PC_Starting_Score <- PC_Data %>% 
+  filter( Season_Day == 0, year >= 2016) %>% 
+  select(year, TOTAL) %>% 
+  dplyr::group_by(year) %>%
+  dplyr::summarise(mean = mean(TOTAL)) %>% 
+  dplyr::mutate(Corps = "Pacific Crest Opening Score")
+
+
+
+
+```
+
+
+
+
+<center>
+
+``` {r PC vs DCI Average start, echo = F, warning= FALSE}
+bind_rows(Avg_DCI_Starting_Score,Avg_PC_Starting_Score) %>%
+  ggplot(aes(x = year, y = mean, color = Corps)) + 
+  geom_line() +
+  geom_point() +
+  theme_bw() +
+  geom_text_repel(aes(x = year, y = mean, label = mean, color = Corps),
+                    box.padding = unit(.1, "lines"),
+                    size = 2.5,
+                  nudge_x = -.01,
+                  nudge_y = .01,
+                  segment.colour = NA,
+                    point.padding = unit(.7, "lines")) +
+  labs( x = "Season", y = "Average Total Score", title = "Pacific Crest's Opening Score Vs. Average DCI Opening Score") +
+   theme(legend.position = c(.8,.2)) +
+   scale_color_manual( values = c("#30c5e3","#bf9134"))
+```
+</center>
+ 
+
+``` {r Season Long Average, echo = F, include = F}
+Avg_DCI_Score <- DCI_Historic_Data %>% 
+  select(Corps, year, TOTAL) %>% 
+  dplyr:: group_by(year) %>% 
+  dplyr::summarise(mean = round(mean(TOTAL),3)) %>% 
+  dplyr:: mutate(Corps = "Average DCI Score")
+
+Avg_PC_Score <- PC_Data %>%
+  select(Corps, year, TOTAL) %>% 
+  dplyr:: group_by(year) %>% 
+  dplyr::summarise(mean = round(mean(TOTAL),3)) %>% 
+  dplyr:: mutate(Corps = "Pacific Crest Average Score")
+
+Twelfth_place_average_score <- DCI_Historic_Data %>% 
+  filter(Show %in% c("DCI World Championship Finals" , "DCI World Championship World Class Finals"), Place == 12) %>% 
+  select(Corps, year) %>% 
+  left_join(DCI_Historic_Data, by = c("Corps" = "Corps", "year" = "year")) %>% 
+  select(Corps, TOTAL, year) %>% 
+  dplyr::group_by(year) %>% 
+  dplyr::summarise(mean = round(mean(TOTAL),3)) %>% 
+  dplyr:: mutate(Corps = "12th Place Avgerage Score")
+
+
+```
+
+We can look at the same chart but on a season long scale. This time we'll add in the 12th place corps average for each year. While both the average DCI Score and the 12th place average score appear to be stagnating, Pacific Crest is once again improving faster than average. In 4 years, Pacific Crest's average score improved `r 75.288 - 66.282` while the DCI Average and the 12th place average are at `r 79.268 - 74.903` and `r 78.611 - 74.231` respectively. Pacific Crest is improving at twice that rate.
+
+<center>
+``` {r echo = F, warning= FALSE}
+bind_rows(Twelfth_place_average_score, Avg_PC_Score) %>% 
+  bind_rows(Avg_DCI_Score) %>% 
+  filter(year >= 2016) %>% 
+  ggplot(aes(x = year, y = mean, color = Corps)) +
+  geom_line() +
+  geom_point() +
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  geom_text_repel(aes(x = year, y = mean, label = mean, color = Corps),
+                    box.padding = unit(.15, "lines"),
+                    size = 2.5,
+                  nudge_x = .00,
+                  nudge_y = .01,
+                  segment.colour = NA,
+                    point.padding = unit(.7, "lines")) +
+  scale_color_manual( values = c("#d12a2a","#30c5e3","#bf9134"))+
+  theme(legend.position = c(.8,.2)) +
+  labs( x = "Season", y = "Average Total Score", title = "Overall Average Score Comparison")
+```
+</center>
+
+Of course, there’s no telling if Pacific Crest could keep this momentum going into 2020. It's very possible that they take a step back, similar to what they did in 2017. However, the last time we saw a newcomer get this close to taking a Final slot, their following year was explosive.
+
+
+
+### For Every Action...
+
+A new corps breaking into finals isn't a very common thing. It has, however, happened a few times in the last 4 years. In 2018, the Mandarins found themselves performing on the last day of the season after a heart-breaking end to their record 2017 campaign. Prior to that, The Academy burst their way on to the Finals card in 2016 with their fan favorite performance "Drum Corpse Bride". They are the ONLY two corps to be newcomers on Saturday night in this millennium. Prior to The Academy, Boston Crusaders earned that recognition in 1999.
+
+The current stampede by Pacific Crest is eerily similar to the Mandarins 2015-2017 run. The trajectory of each corps through their three years is almost identical. Each group was floating around 18th - 22nd place prior to the start of their ascension. In year one, they both finished a sub-par season. Nothing too exceptional. Each group made progress in year 2, taking small steps forward in key areas and becoming much more consistent. The third season was the most similar. Exploding out of the gates as a dark horse for 12th place. they both finished approximately 5 points higher than their previous season. And both corps suffered a heart breaking ending getting left on the outside looking in. In year 4, Mandarins went on to have a consecutive record smashing season expanding off the momentum of year 3. They would eventually finish in 10th place, solidifying their spot among the elite. But for Pacific Crest, year 4 will simply end with What-ifs.
+
+
+
+
+<center>
+
+``` {r echo = F, warning= FALSE}
+DCI_Historic_Data %>% 
+  dplyr::filter(Corps %in% c("Mandarins", "Pacific Crest")) %>% 
+  dplyr::select(Corps, Date, year, TOTAL, Season_Day) %>% 
+  dplyr::filter(case_when(Corps == "Mandarins" ~ year < 2018, T ~ year > 2016)) %>% 
+  dplyr::group_by(year) %>% 
+  dplyr::mutate(Season_year = case_when(Corps == "Mandarins" ~ year - 2014, T ~ year - 2016)) %>% 
+  ggplot() +
+  geom_line(aes(x = as.numeric(Season_Day) , y = as.numeric(TOTAL), color = Corps)) +
+  facet_wrap(~ Season_year)+
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  labs(x = "Days Since First Show", y = "Total Score", title = "Mandarins 2015 - 2017 Vs. Pacific Crest 2017 - 2019") +
+  theme(legend.position = c(.9,.2)) +
+  scale_color_manual( values = c("#4f17a3","#bf9134"))
+  
+```
+
+</center>
+### ...An Equal and Opposite Reaction
+To quote the great Isaac Newton, "For every action, there is an equal and opposite reaction." Unfortunately for DCI placements, this applies as well. A new corps can't join the Top 12, without kicking someone out. Most of the regulars that make it to finals stay in finals, but every once in a while, someone likes to shake things up. For Mandarins, their failing counterpart were the Madison Scouts. Over their 3 season stretch Mandarins took the opportunity of a diminishing super star to sneak into their new Top 12 position. Ironically The Academy also were also able to nudge past Madison for their Finals berth in 2016. The Scouts are no stranger to Finals Night either. Madison has missed finals 3 of the last 5 seasons, but prior to 2016 have only missed being top 12 in 3 of the previous 42 years. They have won the World Championship twice but have been losing their competitiveness in recent years.  Madison eventually took it back from Academy after struggling against the Mandarins in 2017, only to fall to 16th in 2018, giving Mandarins their first Finals performance.
+
+For Pacific Crest, their opposing corps could be Phantom Regiment. Phantom has fallen from their iconic, Spartacus championship in 2008, to as low as 12th place in 2019. they have struggled to maintain in championship contention through the last decade.
+Phantom is also quite familiar with Finals Night and has finished in the top 12 for the last 46 consecutive years.
+
+Over the last three seasons, While DCI is gaining in scores, Phantom Regiment has been on the decline. the decline is gradual, but in a league where scores are improving, any decline can be the slip up someone needs to make their strike. Can Pacific crest capitalize on this opportunity just like Mandarins were able to do in 2018?
+
+<center>
+```{r echo = F, warning= FALSE}
+DCI_Historic_Data %>% 
+  filter(Corps %in% c("Phantom Regiment", "Pacific Crest")) %>% 
+  select(Corps, year, TOTAL) %>%
+  dplyr::group_by(Corps, year) %>% 
+  dplyr::summarise(mean = round(mean(TOTAL),3)) %>%
+  bind_rows(Avg_DCI_Score) %>%
+  filter(year >= 2017) %>% 
+  ggplot(aes(x = year, y = mean, color = Corps)) +
+  geom_line() +
+  geom_point() + 
+  scale_x_continuous(breaks = c(2017,2018,2019)) +
+  scale_y_continuous(breaks = c(70,72,74,76,78,80)) +
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  labs(x = "Season", y = "Average Score", color = 'Corps') +
+  theme(legend.position = c(.8,.2))+ 
+  geom_text_repel(aes(x = year, y = mean, label = mean, color = Corps),
+                  box.padding = unit(.1, "lines"),
+                  size = 2.5,
+                  nudge_x = -.01,
+                  nudge_y = .01,
+                  segment.colour = NA,
+                  point.padding = unit(.7, "lines")) +
+    scale_color_manual( labels = c("Average DCI Score", "Pacific Crest Average Score", "Phantom Regiment Average Score"), values = c("#30c5e3","#bf9134","#000000")) +
+  labs( x = "Season", y = "Average Total Score", title = "Pacific Crest Vs. Phantom Regiment 2017 - 2019")
+   
+
+  
+```
+</center>
+Phantom has been declining. However, it would take an uncommonly bad season for Phantom to drop out of the top 12. Madison was keeping up with the average rise of DCI scores while Mandarins put themselves in striking distance. Then the Scouts took an uncharacteristic step backward in 2018. They dropped almost 3 points overall. This allowed Mandarins to make their move and lock up a finals spot ending 2018 in 10th place.
+
+
+<center>
+```{r echo = F, warning= FALSE}
+DCI_Historic_Data %>% 
+  filter(Corps %in% c("Madison Scouts", "Mandarins")) %>% 
+  select(Corps, year, TOTAL) %>%
+  dplyr::group_by(Corps, year) %>% 
+  dplyr::summarise(mean = round(mean(TOTAL),3)) %>%
+  bind_rows(Avg_DCI_Score) %>%
+  filter(year <= 2018) %>% 
+  ggplot(aes(x = year, y = mean, color = Corps)) +
+  geom_line() +
+  geom_point() +
+  theme_bw() +
+  theme(legend.position = c(.8,.2))+ 
+  geom_text_repel(aes(x = year, y = mean, label = mean, color = Corps),
+                    box.padding = unit(.1, "lines"),
+                    size = 2.5,
+                  nudge_x = .00,
+                  nudge_y = .01,
+                  segment.colour = NA,
+                    point.padding = unit(.7, "lines")) +
+  labs(x = "Season", y = "Average Score over the Season") +
+  scale_color_manual( labels = c("Average DCI Score", "Madison Scouts Average Score", "Mandarins Average Score"),
+                      values = c("#30c5e3","#165c11","#4f17a3")) +
+  labs( x = "Season", y = "Average Total Score", title = "Mandarins Vs. Madison Scouts 2015 - 2018")
+
+  
+```
+</center>
+In 2019 Pacific Crest put themselves in position to strike, and their target is Phantom Regiment. If Phantom can’t make the progress it needs to stay relevant, Pacific Crest will be ready and waiting to replace them. Pacific Crest would be the next on the list to add World Class Finalist to their achievements. Except for one thing...
+
+### The Pandemic
+
+The year 2020 has been plagued with a deadly virus. COVID-19 has shut down nearly every major sporting event, closed business', and forced everyone to take precautions to avoid contact and distance themselves from others. Drum Corps has not been spared. DCI made the smart decision to cancel the 2020 season to reduce the spread of COVID-19. This decision will greatly impact the future of the activity logistically, financially, and competitively. Yet it is Pacific Crest who will exit this summer asking "What if..." 
+
+
+### 2021 Here We Come!
+
+The 2020 season was shaping up to be a rollercoaster of emotion for the competitors and audience. Unfortunately, we must move on, before it even starts. We must look forward to 2021. The competitive field may look different, but will Pacific Crest be able to continue their rise to glory? 
+
+Making the list to compete on Finals Night is an accomplishment of hard work and dedication unlike any other, and not everyone in the activity gets to experience it. Pacific Crest 2020 was going to be next on that list, but a year away from the activity can change a lot in a corps. Can they continue to thrive after taking a year off? Can they keep the membership interested after having back to back record-breaking seasons, then getting postponed? Will all the staff be able to stick around after a summer of not working in the activity?
+
+There are so many puzzle pieces that make a Drum Corps successful. Pacific Crest was holding all those pieces, before getting told they have to wait a year to put them together. There are many questions that will never be answered this summer. No shows, scores, uniforms, encores. No 12 hours bus rides, or dusty gym floors. All we can do is look forward to the future and wait to see what 2021 has in store.
+
+<center>
+For more Facts and Stats follow [DCI Stats](https://twitter.com/DciStatistics) on Twitter.
+
+
+![](/Users/Kurtis Bulock.000\Desktop\DCI Stats\DCI Stats Logo.png)
+
+</center>
+
+
+
